@@ -5,6 +5,7 @@ export default function App() {
 	return (
 		<View style={styles.container}>
 			<Text>Food Runner. A Cross-Platform Food Delivery Mobile App</Text>
+			<Text>Food Runner = The Love for Food and Run</Text>
 			<StatusBar style='auto' />
 		</View>
 	);
