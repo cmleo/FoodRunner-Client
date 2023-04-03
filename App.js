@@ -1,21 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import React from 'react';
+import LoginScreen from './src/screens/Login/LoginScreen';
+import RegisterScreen from './src/screens/Register/RegisterScreen';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 export default function App() {
+	const Stack = createNativeStackNavigator();
+
 	return (
-		<View style={styles.container}>
-			<Text>Food Runner. A Cross-Platform Food Delivery Mobile App</Text>
-			<Text>Food Runner = The Love for Food and Run</Text>
-			<StatusBar style='auto' />
-		</View>
+		<NavigationContainer>
+			<Stack.Navigator>
+				<Stack.Screen name='Login' component={LoginScreen} />
+				<Stack.Screen name='Register' component={RegisterScreen} />
+			</Stack.Navigator>
+		</NavigationContainer>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-});
