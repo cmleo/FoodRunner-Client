@@ -109,6 +109,19 @@ const styles = StyleSheet.create({
 	checkboxText: {
 		fontSize: 16,
 	},
+
+	button: {
+		width: '80%',
+		height: 40,
+		backgroundColor: 'blue',
+		borderRadius: 5,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	buttonText: {
+		color: 'white',
+		fontWeight: 'bold',
+	},
 });
 
 export default LoginScreen;
