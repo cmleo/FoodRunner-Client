@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
-const RegisterScreen = () => {
+const RegisterScreen = ({ navigation }) => {
 	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
@@ -12,6 +13,7 @@ const RegisterScreen = () => {
 	const [passwordError, setPasswordError] = useState('');
 	const [confirmPasswordError, setConfirmPasswordError] = useState('');
 	const [phoneError, setPhoneError] = useState('');
+	const [role, setRole] = useState('user');
 
 	// Validate inputs
 	const validateForm = () => {
@@ -62,7 +64,14 @@ const RegisterScreen = () => {
 		const isValid = validateForm();
 
 		if (isValid) {
-			fetch('http://192.168.1.3:3000/user/signup', {
+			let registerEndpoint = '';
+			if (role === 'user') {
+				registerEndpoint = 'http://192.168.1.3:3000/user/signup';
+			} else if (role === 'admin') {
+				registerEndpoint = 'http://192.168.1.3:3000/admin/signup';
+			}
+
+			fetch(registerEndpoint, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -89,10 +98,15 @@ const RegisterScreen = () => {
 				.then((data) => {
 					console.log(data);
 					handleReset();
+
+					// Display success message as alert
+					Alert.alert('Success', 'User Registered Successfully !');
+
+					navigation.navigate('Login');
 				})
 				.catch((error) => {
 					// Display error message as alert
-					Alert.alert('Email', error.message);
+					Alert.alert('Error', error.message);
 					console.log(error);
 				});
 		}
@@ -108,6 +122,12 @@ const RegisterScreen = () => {
 		<ScrollView>
 			<View style={styles.container}>
 				<Text style={styles.title}>Register</Text>
+
+				<Picker selectedValue={role} onValueChange={(itemValue) => setRole(itemValue)} style={styles.input}>
+					<Picker.Item label='Client' value='user' />
+					<Picker.Item label='Restaurant Owner' value='admin' />
+				</Picker>
+
 				<TextInput style={styles.input} placeholder='Name' onChangeText={(text) => setName(text)} value={name} />
 				{nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
 

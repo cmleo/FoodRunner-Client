@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -9,7 +9,7 @@ const LoginScreen = ({ navigation }) => {
 	const [rememberMe, setRememberMe] = useState(false);
 	const [emailError, setEmailError] = useState('');
 	const [passwordError, setPasswordError] = useState('');
-	const [role, setRole] = useState('user'); // State to store the selected role
+	const [role, setRole] = useState('user');
 
 	// Validate inputs
 	const validateForm = () => {
@@ -35,14 +35,14 @@ const LoginScreen = ({ navigation }) => {
 	};
 
 	const handleLogin = () => {
-		let isValid = validateForm();
+		const isValid = validateForm();
 
 		if (isValid) {
 			let loginEndpoint = '';
 			if (role === 'user') {
-				loginEndpoint = 'http://localhost:3000/user/login';
+				loginEndpoint = 'http://192.168.1.3:3000/user/login';
 			} else if (role === 'admin') {
-				loginEndpoint = 'http://localhost:3000/admin/login';
+				loginEndpoint = 'http://192.168.1.3:3000/admin/login';
 			}
 
 			fetch(loginEndpoint, {
@@ -62,15 +62,23 @@ const LoginScreen = ({ navigation }) => {
 					if (data.token && rememberMe) {
 						AsyncStorage.setItem('token', data.token);
 					}
-					alert('Login Successful !');
-					// Add logic to navigate to the main app screen or AdminScreen based on the selected role
-					if (role === 'user') {
-						// Navigate to main app screen
-					} else if (role === 'admin') {
-						// Navigate to AdminScreen
+
+					if (data.message === 'Auth successful') {
+						if (role === 'user') {
+							// Navigate to main screen
+							Alert.alert('UserLogged', 'User Login Successful !');
+						} else if (role === 'admin') {
+							// Navigate to AdminScreen
+							Alert.alert('AdminLogged', 'Admin Login Successful !');
+						}
+					} else {
+						// Display error message returned from server
+						Alert.alert('Error', data.message);
 					}
 				})
 				.catch((error) => {
+					// Handle network errors
+					Alert.alert('Error', 'Failed to connect to server. Please try again later.');
 					console.log(error);
 				});
 		}
@@ -87,7 +95,19 @@ const LoginScreen = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Login</Text>
-			<TextInput style={styles.input} placeholder='Email' onChangeText={(text) => setEmail(text)} value={email} />
+
+			<Picker selectedValue={role} onValueChange={(itemValue) => setRole(itemValue)} style={styles.input}>
+				<Picker.Item label='Client' value='user' />
+				<Picker.Item label='Restaurant Owner' value='admin' />
+			</Picker>
+
+			<TextInput
+				style={styles.input}
+				placeholder='Email'
+				onChangeText={(text) => setEmail(text)}
+				value={email}
+				keyboardType='email-address'
+			/>
 			{emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
 			<TextInput
