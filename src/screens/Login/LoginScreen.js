@@ -1,47 +1,94 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [rememberMe, setRememberMe] = useState(false);
+	const [emailError, setEmailError] = useState('');
+	const [passwordError, setPasswordError] = useState('');
+	const [role, setRole] = useState('user'); // State to store the selected role
+
+	// Validate inputs
+	const validateForm = () => {
+		let isValid = true;
+
+		if (!email) {
+			setEmailError('Please enter an email address');
+			isValid = false;
+		} else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+			setEmailError('Please enter a valid email address');
+			isValid = false;
+		} else {
+			setEmailError('');
+		}
+
+		if (!password) {
+			setPasswordError('Please enter a password');
+			isValid = false;
+		} else {
+			setPasswordError('');
+		}
+		return isValid;
+	};
 
 	const handleLogin = () => {
-		fetch('http://192.168.0.102:3000/user/login', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				email: email,
-				password: password,
-			}),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				console.log(data);
-				handleReset();
-				if (data.token && rememberMe) {
-					AsyncStorage.setItem('token', data.token);
-				}
-				// Add logic to navigate to the main app screen
+		let isValid = validateForm();
+
+		if (isValid) {
+			let loginEndpoint = '';
+			if (role === 'user') {
+				loginEndpoint = 'http://localhost:3000/user/login';
+			} else if (role === 'admin') {
+				loginEndpoint = 'http://localhost:3000/admin/login';
+			}
+
+			fetch(loginEndpoint, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					email: email,
+					password: password,
+				}),
 			})
-			.catch((error) => {
-				console.log(error);
-			});
+				.then((response) => response.json())
+				.then((data) => {
+					console.log(data);
+					handleReset();
+					if (data.token && rememberMe) {
+						AsyncStorage.setItem('token', data.token);
+					}
+					alert('Login Successful !');
+					// Add logic to navigate to the main app screen or AdminScreen based on the selected role
+					if (role === 'user') {
+						// Navigate to main app screen
+					} else if (role === 'admin') {
+						// Navigate to AdminScreen
+					}
+				})
+				.catch((error) => {
+					console.log(error);
+				});
+		}
 	};
 
 	const handleReset = () => {
 		setEmail('');
 		setPassword('');
 		setRememberMe(false);
+		setEmailError('');
+		setPasswordError('');
 	};
 
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Login</Text>
 			<TextInput style={styles.input} placeholder='Email' onChangeText={(text) => setEmail(text)} value={email} />
+			{emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
 			<TextInput
 				style={styles.input}
@@ -50,6 +97,7 @@ const LoginScreen = ({ navigation }) => {
 				onChangeText={(text) => setPassword(text)}
 				value={password}
 			/>
+			{passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
 
 			<View style={styles.checkboxContainer}>
 				<TouchableOpacity style={styles.checkbox} onPress={() => setRememberMe(!rememberMe)}>
@@ -122,6 +170,16 @@ const styles = StyleSheet.create({
 	buttonText: {
 		color: 'white',
 		fontWeight: 'bold',
+	},
+	errorText: {
+		color: 'red',
+		marginBottom: 10,
+	},
+	registerLink: {
+		color: 'blue',
+		fontSize: 16,
+		fontWeight: 'bold',
+		textDecorationLine: 'underline',
 	},
 });
 
