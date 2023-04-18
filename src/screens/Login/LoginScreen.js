@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from './LoginStyles';
 
 const LoginScreen = ({ navigation }) => {
 	const [email, setEmail] = useState('');
@@ -93,7 +94,7 @@ const LoginScreen = ({ navigation }) => {
 	};
 
 	return (
-		<View style={styles.container}>
+		<SafeAreaView style={styles.container}>
 			<Text style={styles.title}>Login</Text>
 
 			<Picker selectedValue={role} onValueChange={(itemValue) => setRole(itemValue)} style={styles.input}>
@@ -136,71 +137,8 @@ const LoginScreen = ({ navigation }) => {
 					Register
 				</Text>
 			</Text>
-		</View>
+		</SafeAreaView>
 	);
 };
-
-const styles = StyleSheet.create({
-	container: {
-		marginTop: 80,
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		marginBottom: 20,
-	},
-	input: {
-		width: '80%',
-		height: 40,
-		borderColor: 'gray',
-		borderWidth: 1,
-		borderRadius: 5,
-		paddingLeft: 10,
-		marginBottom: 10,
-	},
-	checkboxContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginBottom: 10,
-	},
-	checkbox: {
-		width: 20,
-		height: 20,
-		borderWidth: 1,
-		borderRadius: 3,
-		borderColor: 'gray',
-		alignItems: 'center',
-		justifyContent: 'center',
-		marginRight: 10,
-	},
-	checkboxText: {
-		fontSize: 16,
-	},
-
-	button: {
-		width: '80%',
-		height: 40,
-		backgroundColor: 'blue',
-		borderRadius: 5,
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	buttonText: {
-		color: 'white',
-		fontWeight: 'bold',
-	},
-	errorText: {
-		color: 'red',
-		marginBottom: 10,
-	},
-	registerLink: {
-		color: 'blue',
-		fontSize: 16,
-		fontWeight: 'bold',
-		textDecorationLine: 'underline',
-	},
-});
 
 export default LoginScreen;
