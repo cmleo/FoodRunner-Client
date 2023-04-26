@@ -67,7 +67,7 @@ const LoginScreen = ({ navigation }) => {
 					if (data.message === 'Auth successful') {
 						if (role === 'user') {
 							// Navigate to main screen
-							Alert.alert('UserLogged', 'User Login Successful !');
+							navigation.navigate('Home');
 						} else if (role === 'admin') {
 							// Navigate to AdminScreen
 							Alert.alert('AdminLogged', 'Admin Login Successful !');
