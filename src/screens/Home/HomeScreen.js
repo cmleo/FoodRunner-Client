@@ -1,40 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { Text, StyleSheet, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
-	const [username, setUsername] = useState(null);
-
-	const getAuthenticatedUser = async (token) => {
-		const response = await fetch('http://192.168.1.3:3000/user', {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
-		const data = await response.json();
-		if (data.username) {
-			setUsername(data.username);
-		}
-	};
+	const [userData, setUserData] = useState({});
 
 	useEffect(() => {
-		AsyncStorage.getItem('token')
-			.then((token) => {
-				if (token) {
-					getAuthenticatedUser(token);
-				}
-			})
-			.catch((error) => {
-				console.log(error);
+		const fetchUserData = async () => {
+			const token = await AsyncStorage.getItem('token');
+			const response = await fetch(`${process.env.API_URL}/user`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
 			});
+			const data = await response.json();
+			setUserData(data[0]);
+		};
+		fetchUserData();
 	}, []);
 
 	return (
-		<View>
-			<Text>Welcome {username}</Text>
-		</View>
+		<SafeAreaView style={styles.container}>
+			{userData ? <Text style={styles.text}>Welcome, {userData.name}!</Text> : <Text>Loading...</Text>}
+		</SafeAreaView>
 	);
 };
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	text: {
+		fontSize: 20,
+		fontWeight: 'bold',
+	},
+});
 
 export default HomeScreen;
