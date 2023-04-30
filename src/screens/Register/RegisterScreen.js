@@ -67,9 +67,9 @@ const RegisterScreen = ({ navigation }) => {
 		if (isValid) {
 			let registerEndpoint = '';
 			if (role === 'user') {
-				registerEndpoint = 'http://192.168.1.3:3000/user/signup';
+				registerEndpoint = `${process.env.API_URL}/user/signup`;
 			} else if (role === 'admin') {
-				registerEndpoint = 'http://192.168.1.3:3000/admin/signup';
+				registerEndpoint = `${process.env.API_URL}/admin/signup`;
 			}
 
 			fetch(registerEndpoint, {

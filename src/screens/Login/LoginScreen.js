@@ -41,9 +41,9 @@ const LoginScreen = ({ navigation }) => {
 		if (isValid) {
 			let loginEndpoint = '';
 			if (role === 'user') {
-				loginEndpoint = 'http://192.168.1.3:3000/user/login';
+				loginEndpoint = `${process.env.API_URL}/user/login`;
 			} else if (role === 'admin') {
-				loginEndpoint = 'http://192.168.1.3:3000/admin/login';
+				loginEndpoint = `${process.env.API_URL}/admin/login`;
 			}
 
 			fetch(loginEndpoint, {
@@ -58,9 +58,8 @@ const LoginScreen = ({ navigation }) => {
 			})
 				.then((response) => response.json())
 				.then((data) => {
-					console.log(data);
 					handleReset();
-					if (data.token && rememberMe) {
+					if (data.token) {
 						AsyncStorage.setItem('token', data.token);
 					}
 
@@ -80,7 +79,6 @@ const LoginScreen = ({ navigation }) => {
 				.catch((error) => {
 					// Handle network errors
 					Alert.alert('Error', 'Failed to connect to server. Please try again later.');
-					console.log(error);
 				});
 		}
 	};
