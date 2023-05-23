@@ -3,14 +3,14 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-const Footer = () => {
+const Footer = ({ searchRef }) => {
 	const navigation = useNavigation();
 	return (
 		<View style={styles.footer}>
 			<TouchableOpacity onPress={() => navigation.navigate('Home')}>
 				<AntDesign name='home' size={24} color='black' />
 			</TouchableOpacity>
-			<TouchableOpacity>
+			<TouchableOpacity onPress={() => searchRef.current?.focus()}>
 				<Ionicons name='search' size={24} color='black' />
 			</TouchableOpacity>
 			<TouchableOpacity onPress={() => navigation.navigate('Cart')}>
