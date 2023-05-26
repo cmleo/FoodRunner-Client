@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './LoginStyles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LoginScreen = ({ navigation }) => {
 	const [email, setEmail] = useState('');
@@ -41,9 +42,9 @@ const LoginScreen = ({ navigation }) => {
 		if (isValid) {
 			let loginEndpoint = '';
 			if (role === 'user') {
-				loginEndpoint = `${process.env.API_URL}/user/login`;
+				loginEndpoint = `http://192.168.0.102:3000/user/login`;
 			} else if (role === 'admin') {
-				loginEndpoint = `${process.env.API_URL}/admin/login`;
+				loginEndpoint = `http://192.168.0.102:3000/admin/login`;
 			}
 
 			fetch(loginEndpoint, {
@@ -78,6 +79,7 @@ const LoginScreen = ({ navigation }) => {
 				})
 				.catch((error) => {
 					// Handle network errors
+					console.log(error);
 					Alert.alert('Error', 'Failed to connect to server. Please try again later.');
 				});
 		}
