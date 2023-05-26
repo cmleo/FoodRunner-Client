@@ -1,11 +1,12 @@
-import { View, Text, ScrollView, Image, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { themeColors } from '../../theme/theme';
 import Search from '../../components/Search/Search';
 import Categories from '../../components/Categories/Categories';
 import Footer from '../../components/Footer/Footer';
+import RestaurantCard from '../../components/RestaurantCard/RestaurantCard';
 
 export default function HomeScreen() {
 	const [restaurants, setRestaurants] = useState([]);
@@ -52,16 +53,7 @@ export default function HomeScreen() {
 					</ScrollView>
 
 					{/* restaurants */}
-					{restaurants.map((restaurant) => (
-						<View key={restaurant._id} style={{ marginVertical: 10, paddingHorizontal: 20 }}>
-							<Text style={{ fontWeight: 'bold', fontSize: 18 }}>{restaurant.restaurantName}</Text>
-							<Text style={{ fontSize: 14 }}>{restaurant.location}</Text>
-
-							<ScrollView horizontal showsHorizontalScrollIndicator={false} key={restaurant._id} className='overflow-visible py-5'>
-								<Image source={{ uri: restaurant.logo }} style={{ width: '100%', height: 200, borderRadius: 10 }} />
-							</ScrollView>
-						</View>
-					))}
+					<RestaurantCard restaurants={restaurants} fetchAllRestaurants={fetchAllRestaurants} />
 				</ScrollView>
 			</View>
 			<Footer searchRef={searchRef} />
