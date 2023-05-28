@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './LoginStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { env } from '../../../env';
 
 const LoginScreen = ({ navigation }) => {
 	const [email, setEmail] = useState('');
@@ -42,9 +43,9 @@ const LoginScreen = ({ navigation }) => {
 		if (isValid) {
 			let loginEndpoint = '';
 			if (role === 'user') {
-				loginEndpoint = `http://192.168.0.102:3000/user/login`;
+				loginEndpoint = `${env.API_URL}/user/login`;
 			} else if (role === 'admin') {
-				loginEndpoint = `http://192.168.0.102:3000/admin/login`;
+				loginEndpoint = `${env.API_URL}/admin/login`;
 			}
 
 			fetch(loginEndpoint, {

@@ -1,12 +1,13 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { env } from '../../../env';
 
 export default function Categories(props) {
 	const [categories, setCategories] = useState([]);
 
 	useEffect(() => {
 		const fetchCategories = async () => {
-			const response = await fetch('http://192.168.0.102:3000/categories');
+			const response = await fetch(`${env.API_URL}/categories`);
 			const data = await response.json();
 			setCategories(data);
 		};
@@ -16,7 +17,7 @@ export default function Categories(props) {
 	useEffect(() => {
 		if (props.activeCategory) {
 			const fetchRestaurants = async () => {
-				const response = await fetch(`http://192.168.0.102:3000/categories/${props.activeCategory}/restaurants`);
+				const response = await fetch(`${env.API_URL}/categories/${props.activeCategory}/restaurants`);
 				const data = await response.json();
 				props.setRestaurants(data);
 			};

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, ScrollView } from 'react-native';
 import Footer from '../Footer/Footer';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { env } from '../../../env';
 
 function Dashboard() {
 	const [userData, setUserData] = useState({});
@@ -10,7 +11,7 @@ function Dashboard() {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			const token = await AsyncStorage.getItem('token');
-			const response = await fetch(`http://192.168.0.102:3000/user`, {
+			const response = await fetch(`${env.API_URL}/user`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},

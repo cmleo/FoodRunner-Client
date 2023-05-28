@@ -3,6 +3,7 @@ import { Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import styles from './RegisterStyles';
+import { env } from '../../../env';
 
 const RegisterScreen = ({ navigation }) => {
 	const [name, setName] = useState('');
@@ -68,9 +69,9 @@ const RegisterScreen = ({ navigation }) => {
 		if (isValid) {
 			let registerEndpoint = '';
 			if (role === 'user') {
-				registerEndpoint = `http://192.168.0.102:3000/user/signup`;
+				registerEndpoint = `${env.API_URL}/user/signup`;
 			} else if (role === 'admin') {
-				registerEndpoint = `http://192.168.0.102:3000/admin/signup`;
+				registerEndpoint = `${env.API_URL}/admin/signup`;
 			}
 
 			fetch(registerEndpoint, {

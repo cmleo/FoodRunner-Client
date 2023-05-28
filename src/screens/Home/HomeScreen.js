@@ -7,6 +7,7 @@ import Search from '../../components/Search/Search';
 import Categories from '../../components/Categories/Categories';
 import Footer from '../../components/Footer/Footer';
 import RestaurantCard from '../../components/RestaurantCard/RestaurantCard';
+import { env } from '../../../env';
 
 export default function HomeScreen() {
 	const [restaurants, setRestaurants] = useState([]);
@@ -14,7 +15,7 @@ export default function HomeScreen() {
 	const searchRef = useRef(null);
 
 	const fetchAllRestaurants = async () => {
-		const response = await fetch(`http://192.168.0.102:3000/restaurants`);
+		const response = await fetch(`${env.API_URL}/restaurants`);
 		const data = await response.json();
 		setRestaurants(data);
 		setActiveCategory(null);
