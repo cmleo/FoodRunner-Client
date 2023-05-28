@@ -19,6 +19,7 @@ export default function HomeScreen() {
 		const data = await response.json();
 		setRestaurants(data);
 		setActiveCategory(null);
+		searchRef.current.clear();
 	};
 
 	return (
@@ -26,7 +27,7 @@ export default function HomeScreen() {
 			<View className='flex-1'>
 				{/* search bar */}
 				<View className='flex-row items-center space-x-2 px-4 pb-2'>
-					<Search searchRef={searchRef} />
+					<Search searchRef={searchRef} setRestaurants={setRestaurants} />
 				</View>
 
 				{/* main */}
