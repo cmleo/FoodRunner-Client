@@ -1,17 +1,20 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const Footer = ({ searchRef }) => {
 	const navigation = useNavigation();
+	const route = useRoute();
+	const isHomeScreen = route.name === 'Home';
+
 	return (
 		<View style={styles.footer}>
 			<TouchableOpacity onPress={() => navigation.navigate('Home')}>
 				<AntDesign name='home' size={24} color='black' />
 			</TouchableOpacity>
-			<TouchableOpacity onPress={() => searchRef.current?.focus()}>
-				<Ionicons name='search' size={24} color='black' />
+			<TouchableOpacity onPress={isHomeScreen ? () => searchRef.current?.focus() : null} disabled={!isHomeScreen}>
+				<Ionicons name='search' size={24} color={isHomeScreen ? 'black' : 'gray'} />
 			</TouchableOpacity>
 			<TouchableOpacity onPress={() => navigation.navigate('Cart')}>
 				<MaterialIcons name='shopping-cart' size={24} color='black' />
