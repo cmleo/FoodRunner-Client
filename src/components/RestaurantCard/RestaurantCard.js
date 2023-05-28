@@ -1,7 +1,10 @@
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 export default function RestaurantCard({ restaurants, fetchAllRestaurants }) {
+	const navigation = useNavigation();
+
 	return (
 		<ScrollView
 			showsVerticalScrollIndicator={false}
@@ -13,10 +16,12 @@ export default function RestaurantCard({ restaurants, fetchAllRestaurants }) {
 			{restaurants.map((restaurant) => (
 				<View key={restaurant._id} style={{ marginVertical: 10, paddingHorizontal: 20 }}>
 					<Text style={{ fontWeight: 'bold', fontSize: 18 }}>{restaurant.restaurantName}</Text>
-					<Text stAyle={{ fontSize: 14 }}>{restaurant.location}</Text>
+					<Text style={{ fontSize: 14 }}>{restaurant.location}</Text>
 
 					<ScrollView key={restaurant._id}>
-						<Image source={{ uri: restaurant.logo }} style={{ width: '100%', height: 200, borderRadius: 10 }} />
+						<TouchableOpacity onPress={() => navigation.navigate('Restaurant', { restaurantId: restaurant._id })}>
+							<Image source={{ uri: restaurant.logo }} style={{ width: '100%', height: 200, borderRadius: 10 }} />
+						</TouchableOpacity>
 					</ScrollView>
 				</View>
 			))}
