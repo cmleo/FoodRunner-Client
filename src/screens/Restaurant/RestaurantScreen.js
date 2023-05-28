@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Footer from '../../components/Footer/Footer';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { env } from '../../../env';
+import { AntDesign, Feather } from '@expo/vector-icons';
+import { themeColors } from '../../theme/theme';
+import ProductRow from '../../components/ProductRow/ProductRow';
 
 export default function RestaurantScreen() {
 	const route = useRoute();
 	const { restaurantId } = route.params;
 
 	const [restaurant, setRestaurant] = useState(null);
+	const navigation = useNavigation();
 
 	useEffect(() => {
 		const fetchRestaurant = async () => {
@@ -31,31 +35,32 @@ export default function RestaurantScreen() {
 
 	return (
 		<SafeAreaView className='flex-1'>
-			<ScrollView className='flex-1' contentContainerStyle='py-20 px-10'>
-				{/* Restaurant logo, name, and location */}
-				<View className='items-center mb-20'>
-					<Image source={{ uri: restaurant.logo }} className='w-40 h-40 rounded-full' />
-					<Text className='text-2xl font-bold mt-4'>{restaurant.restaurantName}</Text>
-					<Text className='text-lg mt-2'>{restaurant.location}</Text>
+			<ScrollView>
+				<View className='relative'>
+					<Image className='w-full h-60' source={{ uri: restaurant.logo }} />
+					<TouchableOpacity onPress={navigation.goBack} className='absolute top-10 left-4 bg-gray-50 p-2 rounded-full shadow'>
+						<AntDesign name='arrowleft' size={24} color={themeColors.bgColor(1)} />
+					</TouchableOpacity>
 				</View>
 
-				{/* Menu */}
-				<View className='mb-20'>
-					<Text className='text-2xl font-bold mb-4 ml-2'>Menu</Text>
-					{restaurant.menu ? (
-						restaurant.menu.map((item, index) => (
-							<View key={index} className='flex-row items-center mb-4'>
-								<Image source={{ uri: item.image }} className='w-20 h-20 rounded-md mr-4 ml-2' />
-								<View className='flex-1'>
-									<Text className='text-xl font-bold'>{item.productName}</Text>
-									<Text className='text-base mb-2 mr-1'>{item.description}</Text>
-									<Text className='text-lg font-bold'>${item.price}</Text>
-								</View>
-							</View>
-						))
-					) : (
-						<Text>No menu items found</Text>
-					)}
+				<View style={{ borderTopLeftRadius: 40, borderTopRightRadius: 40 }} className='bg-white -mt-12 pt-4'>
+					<View className='px-5'>
+						<Text className='text-2xl font-bold text-center'>{restaurant.restaurantName}</Text>
+						<View className='flex-row space-x-2 my-1'>
+							<Text className='text-sm'>
+								<Feather name='map-pin' size={16} color={themeColors.bgColor(1)} />
+								<Text>{restaurant.location}</Text>
+							</Text>
+						</View>
+					</View>
+				</View>
+
+				<View className='pb-36 bg-gray-100'>
+					<Text className='px-4 py-4 text-2xl font-bold'>Menu</Text>
+					{/* menu */}
+					{restaurant.menu.map((product, index) => (
+						<ProductRow item={{ ...product }} key={index} />
+					))}
 				</View>
 			</ScrollView>
 			<Footer />
