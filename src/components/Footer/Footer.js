@@ -13,12 +13,11 @@ const Footer = ({ searchRef }) => {
 			<TouchableOpacity onPress={() => navigation.navigate('Home')}>
 				<AntDesign name='home' size={24} color='black' />
 			</TouchableOpacity>
+
 			<TouchableOpacity onPress={isHomeScreen ? () => searchRef.current?.focus() : null} disabled={!isHomeScreen}>
 				<Ionicons name='search' size={24} color={isHomeScreen ? 'black' : 'gray'} />
 			</TouchableOpacity>
-			<TouchableOpacity onPress={() => navigation.navigate('Cart')}>
-				<MaterialIcons name='shopping-cart' size={24} color='black' />
-			</TouchableOpacity>
+
 			<TouchableOpacity onPress={() => navigation.navigate('Dashboard')}>
 				<FontAwesome name='user' size={24} color='black' />
 			</TouchableOpacity>
