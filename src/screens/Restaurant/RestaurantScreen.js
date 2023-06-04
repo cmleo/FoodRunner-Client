@@ -7,13 +7,15 @@ import { env } from '../../../env';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { themeColors } from '../../theme/theme';
 import ProductRow from '../../components/ProductRow/ProductRow';
+import CartIcon from '../../components/CartIcon/CartIcon';
 
 export default function RestaurantScreen() {
 	const route = useRoute();
+	const navigation = useNavigation();
 	const { restaurantId } = route.params;
 
 	const [restaurant, setRestaurant] = useState(null);
-	const navigation = useNavigation();
+	const [cartItems, setCartItems] = useState({});
 
 	useEffect(() => {
 		const fetchRestaurant = async () => {
@@ -30,11 +32,37 @@ export default function RestaurantScreen() {
 	}, []);
 
 	if (!restaurant) {
-		return <Text>Loading...</Text>; // Show a loading indicator while fetching the data
+		return <Text className='font-bold text-xl text-center'>Loading...</Text>;
 	}
+
+	const addToCart = (item) => {
+		setCartItems((prevItems) => {
+			const updatedItems = { ...prevItems };
+			if (updatedItems[item._id]) {
+				updatedItems[item._id].quantity++;
+			} else {
+				updatedItems[item._id] = { ...item, quantity: 1 };
+			}
+			return updatedItems;
+		});
+	};
+
+	const removeFromCart = (item) => {
+		setCartItems((prevItems) => {
+			const updatedItems = { ...prevItems };
+			if (updatedItems[item._id]) {
+				updatedItems[item._id].quantity--;
+				if (updatedItems[item._id].quantity === 0) {
+					delete updatedItems[item._id];
+				}
+			}
+			return updatedItems;
+		});
+	};
 
 	return (
 		<SafeAreaView className='flex-1'>
+			<CartIcon cartItems={cartItems} restaurantId={restaurantId} removeFromCart={removeFromCart} />
 			<ScrollView>
 				<View className='relative'>
 					<Image className='w-full h-60' source={{ uri: restaurant.logo }} />
@@ -59,11 +87,10 @@ export default function RestaurantScreen() {
 					<Text className='px-4 py-4 text-2xl font-bold'>Menu</Text>
 					{/* menu */}
 					{restaurant.menu.map((product, index) => (
-						<ProductRow item={{ ...product }} key={index} />
+						<ProductRow item={{ ...product }} key={index} addToCart={addToCart} removeFromCart={removeFromCart} />
 					))}
 				</View>
 			</ScrollView>
-			<Footer />
 		</SafeAreaView>
 	);
 }
