@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { themeColors } from '../../theme/theme';
 import { AntDesign, Feather } from '@expo/vector-icons';
@@ -16,6 +16,7 @@ export default function CartScreen() {
 	const [cartItemsState, setCartItemsState] = useState(cartItems);
 	const [subTotal, setSubTotal] = useState(0);
 	const [totalPrice, setTotalPrice] = useState(0);
+	const [deliveryAddress, setDeliveryAddress] = useState('');
 
 	const DELIVERY_FEE = 5;
 
@@ -81,7 +82,7 @@ export default function CartScreen() {
 					body: JSON.stringify({
 						_id: cartItemsState._id,
 						order: orderItems,
-						deliveryAddress: '123 Main St, New York, NY 10030',
+						deliveryAddress: deliveryAddress,
 						deliveryFee: DELIVERY_FEE,
 					}),
 				});
@@ -146,6 +147,14 @@ export default function CartScreen() {
 					</View>
 				))}
 			</ScrollView>
+
+			<View className=' '>
+				<TextInput
+					className='border-2 border-gray-400 rounded-full px-4 py-2 w-full mb-3'
+					placeholder='Your Delivery Address'
+					onChangeText={(text) => setDeliveryAddress(text)}
+				/>
+			</View>
 
 			{/* totals */}
 			<View className='p-6 px-8 rounded-t-3xl space-y-4 bg-green-300'>
