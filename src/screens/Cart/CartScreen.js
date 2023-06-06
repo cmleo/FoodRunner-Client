@@ -62,9 +62,12 @@ export default function CartScreen() {
 	const addOrderInDB = async () => {
 		const token = await AsyncStorage.getItem('token');
 
-		if (!cartItemsState) {
-			return <Text>No products added in the cart</Text>;
-		} else if (token) {
+		if (token) {
+			if (!deliveryAddress) {
+				Alert.alert('Please enter a delivery address');
+				return;
+			}
+
 			try {
 				const orderItems = Object.values(cartItemsState).map((item) => ({
 					_id: item._id,
@@ -73,7 +76,7 @@ export default function CartScreen() {
 					pricePerQuantity: item.price,
 				}));
 
-				const response = await fetch(`${env.API_URL}/orders`, {
+				await fetch(`${env.API_URL}/orders`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -86,8 +89,8 @@ export default function CartScreen() {
 						deliveryFee: DELIVERY_FEE,
 					}),
 				});
-				const data = await response.json();
-				console.log(data);
+
+				navigation.navigate('OrderReceived');
 			} catch (error) {
 				console.log(error);
 			}
@@ -175,7 +178,6 @@ export default function CartScreen() {
 					style={{ backgroundColor: themeColors.bgColor(1) }}
 					className='p-3 rounded-full'
 					onPress={() => {
-						navigation.navigate('OrderReceived');
 						addOrderInDB();
 					}}
 				>
