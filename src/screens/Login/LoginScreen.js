@@ -62,24 +62,30 @@ const LoginScreen = ({ navigation }) => {
 				.then((data) => {
 					handleReset();
 					if (data.token) {
-						AsyncStorage.setItem('token', data.token);
-					}
-
-					if (data.message === 'Auth successful') {
-						if (role === 'user') {
-							// Navigate to main screen
-							navigation.navigate('Home');
-						} else if (role === 'admin') {
-							// Navigate to AdminScreen
-							Alert.alert('AdminLogged', 'Admin Login Successful !');
-						}
+						AsyncStorage.setItem('token', data.token)
+							.then(() => {
+								if (data.message === 'Auth successful') {
+									if (role === 'user') {
+										// Navigate to main screen
+										navigation.navigate('Home');
+									} else if (role === 'admin') {
+										// Navigate to AdminScreen
+										navigation.navigate('Admin');
+									}
+								} else {
+									// Display error message returned from server
+									Alert.alert('Error', data.message);
+								}
+							})
+							.catch((error) => {
+								// Handle AsyncStorage error
+								console.log(error);
+							});
 					} else {
-						// Display error message returned from server
-						Alert.alert('Error', data.message);
+						console.log('No token found in response');
 					}
 				})
 				.catch((error) => {
-					// Handle network errors
 					console.log(error);
 					Alert.alert('Error', 'Failed to connect to server. Please try again later.');
 				});
