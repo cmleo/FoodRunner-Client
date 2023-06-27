@@ -1,42 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { env } from '../../../env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
+import { Feather, SimpleLineIcons } from '@expo/vector-icons';
+import Footer from '../../components/Footer/Footer';
 
 const AdminScreen = () => {
 	const navigation = useNavigation();
 	const [restaurants, setRestaurants] = useState([]);
 	const [token, setToken] = useState('');
+	const route = useRoute();
+	const { role } = route.params;
 
 	useEffect(() => {
 		// Fetch the list of restaurants created by the admin
+		const fetchAdminRestaurants = async () => {
+			const storedToken = await AsyncStorage.getItem('token');
+			if (!storedToken) {
+				navigation.navigate('Login');
+			} else {
+				setToken(storedToken);
+				fetch(`${env.API_URL}/restaurants/admin`, {
+					method: 'GET',
+					headers: {
+						Authorization: 'Bearer ' + storedToken,
+					},
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						setRestaurants(data);
+					})
+					.catch((error) => {
+						console.error(error);
+					});
+			}
+		};
 		fetchAdminRestaurants();
 	}, []);
-
-	const fetchAdminRestaurants = async () => {
-		const storedToken = await AsyncStorage.getItem('token');
-		if (!storedToken) {
-			navigation.navigate('Login');
-		} else {
-			setToken(storedToken);
-			fetch(`${env.API_URL}/restaurants/admin`, {
-				method: 'GET',
-				headers: {
-					Authorization: 'Bearer ' + storedToken,
-				},
-			})
-				.then((response) => response.json())
-				.then((data) => {
-					setRestaurants(data);
-				})
-				.catch((error) => {
-					console.error(error);
-				});
-		}
-	};
 
 	const handleCreateRestaurant = () => {
 		// Navigate to the create restaurant screen
@@ -46,6 +48,15 @@ const AdminScreen = () => {
 	const handleUpdateRestaurant = (restaurantId) => {
 		// Navigate to the update restaurant screen with the restaurant ID
 		navigation.navigate('UpdateRestaurant', { restaurantId });
+	};
+
+	const handleLogout = async () => {
+		try {
+			await AsyncStorage.removeItem('token');
+			navigation.navigate('Login');
+		} catch (error) {
+			console.error('Logout error:', error);
+		}
 	};
 
 	const handleDeleteRestaurant = (restaurantId) => {
@@ -101,6 +112,9 @@ const AdminScreen = () => {
 	return (
 		<SafeAreaView className='flex-1'>
 			<View className='p-4'>
+				<TouchableOpacity onPress={handleLogout} className='absolute top-10 right-2'>
+					<SimpleLineIcons name='logout' size={32} color='red' />
+				</TouchableOpacity>
 				<Text className='text-2xl font-bold mb-4 text-center'>Admin</Text>
 				<Text className='text-lg font-bold mb-2'>Restaurants</Text>
 			</View>
@@ -110,6 +124,7 @@ const AdminScreen = () => {
 					<Text className='text-white font-bold'>Create New Restaurant</Text>
 				</TouchableOpacity>
 			</View>
+			<Footer role={role} />
 		</SafeAreaView>
 	);
 };
