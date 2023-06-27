@@ -1,4 +1,4 @@
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -8,11 +8,14 @@ import Categories from '../../components/Categories/Categories';
 import Footer from '../../components/Footer/Footer';
 import RestaurantCard from '../../components/RestaurantCard/RestaurantCard';
 import { env } from '../../../env';
+import { useRoute } from '@react-navigation/native';
 
 export default function HomeScreen() {
 	const [restaurants, setRestaurants] = useState([]);
 	const [activeCategory, setActiveCategory] = useState(null);
 	const searchRef = useRef(null);
+	const route = useRoute();
+	const { role } = route.params;
 
 	const fetchAllRestaurants = async () => {
 		const response = await fetch(`${env.API_URL}/restaurants`);
@@ -58,7 +61,7 @@ export default function HomeScreen() {
 					<RestaurantCard restaurants={restaurants} fetchAllRestaurants={fetchAllRestaurants} />
 				</ScrollView>
 			</View>
-			<Footer searchRef={searchRef} />
+			<Footer searchRef={searchRef} role={role} />
 		</SafeAreaView>
 	);
 }

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './LoginStyles';
@@ -13,6 +13,42 @@ const LoginScreen = ({ navigation }) => {
 	const [emailError, setEmailError] = useState('');
 	const [passwordError, setPasswordError] = useState('');
 	const [role, setRole] = useState('user');
+
+	useEffect(() => {
+		const loadRememberedCredentials = async () => {
+			try {
+				const storedEmail = await AsyncStorage.getItem('email');
+				const storedPassword = await AsyncStorage.getItem('password');
+				const storedLoginTime = await AsyncStorage.getItem('loginTime');
+				const storedRole = await AsyncStorage.getItem('role');
+				const token = await AsyncStorage.getItem('token');
+
+				if (storedEmail && storedPassword && storedLoginTime) {
+					const currentTime = new Date().getTime();
+					const loginTime = parseInt(storedLoginTime);
+					const timeLimit = 60 * 60 * 1000; // 1h in milliseconds
+
+					if (currentTime - loginTime <= timeLimit && token) {
+						if (storedRole === 'user') {
+							navigation.navigate('Home', { role: storedRole });
+						} else if (storedRole === 'admin') {
+							navigation.navigate('Admin', { role: storedRole });
+						}
+					} else {
+						// Clear the stored credentials if the time limit has exceeded
+						AsyncStorage.removeItem('email');
+						AsyncStorage.removeItem('password');
+						AsyncStorage.removeItem('loginTime');
+						AsyncStorage.removeItem('role');
+					}
+				}
+			} catch (error) {
+				console.log('Error loading remembered credentials:', error);
+			}
+		};
+
+		loadRememberedCredentials();
+	}, []);
 
 	// Validate inputs
 	const validateForm = () => {
@@ -65,12 +101,27 @@ const LoginScreen = ({ navigation }) => {
 						AsyncStorage.setItem('token', data.token)
 							.then(() => {
 								if (data.message === 'Auth successful') {
+									if (rememberMe) {
+										AsyncStorage.setItem('email', email);
+										AsyncStorage.setItem('password', password);
+										AsyncStorage.setItem('role', role);
+
+										// Store the login time
+										const loginTime = new Date().getTime().toString();
+										AsyncStorage.setItem('loginTime', loginTime);
+									} else {
+										AsyncStorage.removeItem('email');
+										AsyncStorage.removeItem('password');
+										AsyncStorage.removeItem('loginTime');
+										AsyncStorage.removeItem('role');
+									}
+
 									if (role === 'user') {
 										// Navigate to main screen
-										navigation.navigate('Home');
+										navigation.navigate('Home', { role: role });
 									} else if (role === 'admin') {
 										// Navigate to AdminScreen
-										navigation.navigate('Admin');
+										navigation.navigate('Admin', { role: role });
 									}
 								} else {
 									// Display error message returned from server
@@ -78,7 +129,6 @@ const LoginScreen = ({ navigation }) => {
 								}
 							})
 							.catch((error) => {
-								// Handle AsyncStorage error
 								console.log(error);
 							});
 					} else {
@@ -104,7 +154,12 @@ const LoginScreen = ({ navigation }) => {
 		<SafeAreaView style={styles.container}>
 			<Text style={styles.title}>Login</Text>
 
-			<Picker selectedValue={role} onValueChange={(itemValue) => setRole(itemValue)} style={styles.input}>
+			<Picker
+				selectedValue={role}
+				onValueChange={(itemValue) => setRole(itemValue)}
+				style={styles.input}
+				itemStyle={{ height: '100%', width: '100%', margin: 0, padding: 0 }}
+			>
 				<Picker.Item label='Client' value='user' />
 				<Picker.Item label='Restaurant Owner' value='admin' />
 			</Picker>

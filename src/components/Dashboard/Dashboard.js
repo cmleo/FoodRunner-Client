@@ -4,6 +4,8 @@ import { Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-nativ
 import Footer from '../Footer/Footer';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { env } from '../../../env';
+import { SimpleLineIcons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
 
 function Dashboard({ navigation }) {
 	const [userData, setUserData] = useState({});
@@ -17,19 +19,33 @@ function Dashboard({ navigation }) {
 	const [currentPasswordError, setCurrentPasswordError] = useState('');
 	const [newPasswordError, setNewPasswordError] = useState('');
 	const [emailError, setEmailError] = useState('');
+	const route = useRoute();
+	const role = route.params;
+	const userRole = role.role;
 
 	useEffect(() => {
 		const fetchUserData = async () => {
-			const token = await AsyncStorage.getItem('token');
-			const response = await fetch(`${env.API_URL}/user`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			const data = await response.json();
-			setUserData(data[0]);
+			try {
+				const token = await AsyncStorage.getItem('token');
+				const response = await fetch(`${env.API_URL}/${userRole}`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch user data');
+				}
+
+				const data = await response.json();
+				setUserData(data[0]);
+			} catch (error) {
+				console.error('Fetch user data error:', error);
+				// Handle the error - display an error message or take appropriate action
+			}
 		};
 		fetchUserData();
+		console.log(userRole);
 	}, []);
 
 	const handleLogout = async () => {
@@ -58,7 +74,7 @@ function Dashboard({ navigation }) {
 				updateData.phone = phone;
 			}
 
-			const response = await fetch(`${env.API_URL}/user`, {
+			const response = await fetch(`${env.API_URL}/${userRole}`, {
 				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json',
@@ -79,7 +95,7 @@ function Dashboard({ navigation }) {
 			setNewPasswordError('');
 
 			const token = await AsyncStorage.getItem('token');
-			const response = await fetch(`${env.API_URL}/user/change-password`, {
+			const response = await fetch(`${env.API_URL}/${userRole}/change-password`, {
 				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json',
@@ -110,7 +126,6 @@ function Dashboard({ navigation }) {
 	};
 
 	const validateEmail = (email) => {
-		// Simple email validation using regex
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
 			setEmailError('Invalid email address');
@@ -124,6 +139,9 @@ function Dashboard({ navigation }) {
 		<SafeAreaView className='flex-1 mt-1'>
 			<ScrollView className='flex-grow pb-16'>
 				<View className='px-4 py-6 bg-gray-100'>
+					<TouchableOpacity onPress={handleLogout} className='absolute top-10 right-3'>
+						<SimpleLineIcons name='logout' size={32} color='red' />
+					</TouchableOpacity>
 					<Text className='text-3xl font-bold text-center'>Dashboard</Text>
 				</View>
 
@@ -159,8 +177,8 @@ function Dashboard({ navigation }) {
 											onChangeText={setPhone}
 											keyboardType='phone-pad'
 										/>
-										<TouchableOpacity onPress={handleUpdateInfo} className='bg-green-500 text-white text-center py-3'>
-											<Text className='text-lg font-bold'>Save</Text>
+										<TouchableOpacity onPress={handleUpdateInfo} className='bg-green-500 text-white text-center py-3 rounded-xl'>
+											<Text className='text-lg font-bold text-center text-white'>Save</Text>
 										</TouchableOpacity>
 									</View>
 								) : (
@@ -168,8 +186,11 @@ function Dashboard({ navigation }) {
 										<Text className='text-gray-600'>User Name: {userData.name}</Text>
 										<Text className='text-gray-600'>Email: {userData.email}</Text>
 										<Text className='text-gray-600'>Phone: {userData.phone}</Text>
-										<TouchableOpacity onPress={() => setEditing(true)} className='bg-blue-500 text-white text-center py-3 mt-4'>
-											<Text className='text-lg font-bold'>Update Info</Text>
+										<TouchableOpacity
+											onPress={() => setEditing(true)}
+											className='bg-blue-500 text-center py-3 mt-4 w-1/2 mx-auto rounded-xl'
+										>
+											<Text className=' text-white text-lg font-bold text-center'>Update Info</Text>
 										</TouchableOpacity>
 									</View>
 								)}
@@ -207,26 +228,31 @@ function Dashboard({ navigation }) {
 								</View>
 							) : null}
 
-							<TouchableOpacity onPress={handleChangePassword} className='bg-green-500 text-white text-center py-3'>
-								<Text className='text-lg font-bold'>Change Password</Text>
+							<TouchableOpacity onPress={handleChangePassword} className='bg-green-500 py-3 mt-4 w-3/4 mx-auto rounded-xl'>
+								<Text className='text-white text-lg font-bold text-center'>Change Password</Text>
 							</TouchableOpacity>
-							{passwordChanged && <Text className='text-green-500 mt-2'>Password changed successfully!</Text>}
+							{passwordChanged && <Text className='text-green-700 mt-2'>Password changed successfully!</Text>}
 						</View>
 					</View>
-					<TouchableOpacity
-						onPress={() => navigation.navigate('DisplayOrders')}
-						className='bg-orange-300 text-white text-center py-3 mt-4'
-					>
-						<Text className='text-lg font-bold'>View Orders</Text>
-					</TouchableOpacity>
+					{userRole === 'user' ? (
+						<TouchableOpacity
+							onPress={() => navigation.navigate('DisplayOrders')}
+							className='bg-orange-300 text-white text-center py-3 mt-14 w-full mx-auto rounded-xl'
+						>
+							<Text className='text-white text-lg font-bold text-center'>View Orders</Text>
+						</TouchableOpacity>
+					) : (
+						<TouchableOpacity
+							onPress={() => navigation.navigate('Admin', { role: userRole })}
+							className='bg-orange-300 text-white text-center py-3 mt-14 w-full mx-auto rounded-xl'
+						>
+							<Text className='text-white text-lg font-bold text-center'>View Restaurants</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 			</ScrollView>
 
-			<TouchableOpacity onPress={handleLogout} className='bg-red-500 text-white text-center py-3'>
-				<Text className='text-lg font-bold'>Logout</Text>
-			</TouchableOpacity>
-
-			<Footer />
+			<Footer role={userRole} />
 		</SafeAreaView>
 	);
 }

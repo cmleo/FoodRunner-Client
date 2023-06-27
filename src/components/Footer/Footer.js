@@ -1,16 +1,25 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { AntDesign, Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { AntDesign, Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-const Footer = ({ searchRef }) => {
+const Footer = ({ searchRef, role }) => {
 	const navigation = useNavigation();
 	const route = useRoute();
 	const isHomeScreen = route.name === 'Home';
 
 	return (
 		<View style={styles.footer}>
-			<TouchableOpacity onPress={() => navigation.navigate('Home')}>
+			<TouchableOpacity
+				onPress={() => {
+					if (role === 'user') {
+						navigation.navigate('Home', { role });
+					} else if (role === 'admin') {
+						navigation.navigate('Admin', { role });
+					}
+					console.log(role);
+				}}
+			>
 				<AntDesign name='home' size={24} color='black' />
 			</TouchableOpacity>
 
@@ -18,7 +27,12 @@ const Footer = ({ searchRef }) => {
 				<Ionicons name='search' size={24} color={isHomeScreen ? 'black' : 'gray'} />
 			</TouchableOpacity>
 
-			<TouchableOpacity onPress={() => navigation.navigate('Dashboard')}>
+			<TouchableOpacity
+				onPress={() => {
+					navigation.navigate('Dashboard', { role });
+					console.log(role);
+				}}
+			>
 				<FontAwesome name='user' size={24} color='black' />
 			</TouchableOpacity>
 		</View>
