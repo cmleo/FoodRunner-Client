@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
 		borderRadius: 5,
 		alignItems: 'center',
 		justifyContent: 'center',
+		marginTop: 10,
 	},
 	buttonText: {
 		color: 'white',
@@ -35,6 +36,19 @@ const styles = StyleSheet.create({
 	errorText: {
 		color: 'red',
 		marginBottom: 10,
+	},
+
+	loginText: {
+		fontWeight: '600',
+		fontSize: 16,
+		marginTop: 10,
+	},
+
+	loginLink: {
+		color: 'blue',
+		fontSize: 18,
+		fontWeight: 'bold',
+		textDecorationLine: 'underline',
 	},
 });
 
