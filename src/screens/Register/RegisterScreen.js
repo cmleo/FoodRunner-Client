@@ -173,6 +173,13 @@ const RegisterScreen = ({ navigation }) => {
 				<TouchableOpacity style={styles.button} onPress={handleRegister}>
 					<Text style={styles.buttonText}>Register</Text>
 				</TouchableOpacity>
+
+				<Text style={styles.loginText}>
+					Already have an account?{' '}
+					<Text style={styles.loginLink} onPress={() => navigation.navigate('Login')}>
+						Login
+					</Text>
+				</Text>
 			</SafeAreaView>
 		</ScrollView>
 	);
