@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		width: '80%',
-		height: 40,
+		height: 50,
 		borderColor: 'gray',
 		borderWidth: 1,
 		borderRadius: 5,
@@ -55,9 +55,16 @@ const styles = StyleSheet.create({
 		color: 'red',
 		marginBottom: 10,
 	},
+
+	registerText: {
+		fontWeight: '600',
+		fontSize: 16,
+		marginTop: 10,
+	},
+
 	registerLink: {
 		color: 'blue',
-		fontSize: 16,
+		fontSize: 18,
 		fontWeight: 'bold',
 		textDecorationLine: 'underline',
 	},
