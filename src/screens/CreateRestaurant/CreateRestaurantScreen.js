@@ -85,14 +85,11 @@ const CreateRestaurantScreen = () => {
 			})
 				.then((response) => response.json())
 				.then((data) => {
-					// Handle success and navigate to the admin screen or show a success message
 					console.log(data);
 					if (data) {
-						// Success message or any other action
 						Alert.alert('Restaurant created successfully!');
-						navigation.navigate('Admin'); // Replace 'AdminScreen' with the actual screen name for the admin screen
+						navigation.navigate('Admin');
 					} else {
-						// Handle failure case
 						Alert.alert('Failed to create restaurant. Please try again.');
 					}
 				})

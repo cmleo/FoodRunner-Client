@@ -27,7 +27,6 @@ function DisplayOrdersScreen({ navigation }) {
 	}, []);
 
 	const handleViewOrder = (orderNumber) => {
-		// Redirect to OrderScreen with orderNumber as a parameter
 		navigation.navigate('Order', { orderNumber });
 	};
 
