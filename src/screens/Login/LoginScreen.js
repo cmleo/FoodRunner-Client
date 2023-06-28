@@ -123,16 +123,13 @@ const LoginScreen = ({ navigation }) => {
 										// Navigate to AdminScreen
 										navigation.navigate('Admin', { role: role });
 									}
-								} else {
-									// Display error message returned from server
-									Alert.alert('Error', data.message);
 								}
 							})
 							.catch((error) => {
 								console.log(error);
 							});
 					} else {
-						console.log('No token found in response');
+						Alert.alert('Error', data.message);
 					}
 				})
 				.catch((error) => {
