@@ -1,14 +1,12 @@
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native';
-import React, { useRef, useState } from 'react';
+import { View, ScrollView, Text } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
-import { themeColors } from '../../theme/theme';
-import Search from '../../components/Search/Search';
-import Categories from '../../components/Categories/Categories';
-import Footer from '../../components/Footer/Footer';
-import RestaurantCard from '../../components/RestaurantCard/RestaurantCard';
 import { env } from '../../../env';
 import { useRoute } from '@react-navigation/native';
+import Categories from '../../components/Categories/Categories';
+import RestaurantCard from '../../components/RestaurantCard/RestaurantCard';
+import Search from '../../components/Search/Search';
+import Footer from '../../components/Footer/Footer';
 
 export default function HomeScreen() {
 	const [restaurants, setRestaurants] = useState([]);
@@ -17,12 +15,33 @@ export default function HomeScreen() {
 	const route = useRoute();
 	const { role } = route.params;
 
+	useEffect(() => {
+		if (activeCategory) {
+			fetchRestaurantsByCategory(activeCategory);
+		} else {
+			fetchAllRestaurants();
+		}
+	}, [activeCategory]);
+
+	const fetchRestaurantsByCategory = async (categoryId) => {
+		try {
+			const response = await fetch(`${env.API_URL}/categories/${categoryId}/restaurants`);
+			const data = await response.json();
+			setRestaurants(data);
+		} catch (error) {
+			console.error('Error fetching restaurants by category:', error);
+		}
+	};
+
 	const fetchAllRestaurants = async () => {
-		const response = await fetch(`${env.API_URL}/restaurants`);
-		const data = await response.json();
-		setRestaurants(data);
-		setActiveCategory(null);
-		searchRef.current.clear();
+		try {
+			const response = await fetch(`${env.API_URL}/restaurants`);
+			const data = await response.json();
+			setRestaurants(data);
+			searchRef.current.clear();
+		} catch (error) {
+			console.error('Error fetching all restaurants:', error);
+		}
 	};
 
 	return (
@@ -30,7 +49,7 @@ export default function HomeScreen() {
 			<View className='flex-1'>
 				{/* search bar */}
 				<View className='flex-row items-center space-x-2 px-4 pb-2'>
-					<Search searchRef={searchRef} setRestaurants={setRestaurants} />
+					<Search searchRef={searchRef} setRestaurants={setRestaurants} fetchAllRestaurants={fetchAllRestaurants} />
 				</View>
 
 				{/* main */}
@@ -48,13 +67,6 @@ export default function HomeScreen() {
 							setRestaurants={setRestaurants}
 							fetchAllRestaurants={fetchAllRestaurants}
 						/>
-						<TouchableOpacity
-							style={{ backgroundColor: themeColors.bgColor(1) }}
-							className='p-4 rounded-l-full ml-24'
-							onPress={fetchAllRestaurants}
-						>
-							<MaterialIcons name='clear' size={24} color='black' />
-						</TouchableOpacity>
 					</ScrollView>
 
 					{/* restaurants */}

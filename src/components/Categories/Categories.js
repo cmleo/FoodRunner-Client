@@ -4,6 +4,7 @@ import { env } from '../../../env';
 
 export default function Categories(props) {
 	const [categories, setCategories] = useState([]);
+	const [activeCategory, setActiveCategory] = useState(null);
 
 	useEffect(() => {
 		const fetchCategories = async () => {
@@ -14,18 +15,17 @@ export default function Categories(props) {
 		fetchCategories();
 	}, []);
 
-	useEffect(() => {
-		if (props.activeCategory) {
-			const fetchRestaurants = async () => {
-				const response = await fetch(`${env.API_URL}/categories/${props.activeCategory}/restaurants`);
-				const data = await response.json();
-				props.setRestaurants(data);
-			};
-			fetchRestaurants();
-		} else {
+	const handleCategoryPress = async (categoryId) => {
+		if (categoryId === activeCategory) {
+			setActiveCategory(null);
 			props.fetchAllRestaurants();
+		} else {
+			setActiveCategory(categoryId);
+			const response = await fetch(`${env.API_URL}/categories/${categoryId}/restaurants`);
+			const data = await response.json();
+			props.setRestaurants(data);
 		}
-	}, [props.activeCategory]);
+	};
 
 	return (
 		<View className='mt-4'>
@@ -38,15 +38,12 @@ export default function Categories(props) {
 				}}
 			>
 				{categories.map((category) => {
-					let isActive = category._id === props.activeCategory;
+					let isActive = category._id === activeCategory;
 					let btnClass = isActive ? ' bg-gray-600' : ' bg-gray-200';
 					let textClass = isActive ? ' font-semibold text-white' : ' text-gray-500';
 					return (
 						<View key={category._id} className='flex justify-center items-center mr-6'>
-							<TouchableOpacity
-								onPress={() => props.setActiveCategory(category._id)}
-								className={'p-1 rounded-full shadow bg-gray-200' + btnClass}
-							>
+							<TouchableOpacity onPress={() => handleCategoryPress(category._id)} className={'p-1 rounded-full shadow' + btnClass}>
 								<Text className={'text-sm p-1' + textClass}>{category.name}</Text>
 							</TouchableOpacity>
 						</View>

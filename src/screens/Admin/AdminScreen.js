@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { env } from '../../../env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,37 +12,44 @@ const AdminScreen = () => {
 	const [restaurants, setRestaurants] = useState([]);
 	const [token, setToken] = useState('');
 	const route = useRoute();
-	const { role } = route.params;
+	const { role } = route.params ?? { role: 'admin' };
 
-	useEffect(() => {
-		// Fetch the list of restaurants created by the admin
-		const fetchAdminRestaurants = async () => {
-			const storedToken = await AsyncStorage.getItem('token');
-			if (!storedToken) {
-				navigation.navigate('Login');
-			} else {
-				setToken(storedToken);
-				fetch(`${env.API_URL}/restaurants/admin`, {
-					method: 'GET',
-					headers: {
-						Authorization: 'Bearer ' + storedToken,
-					},
+	useFocusEffect(
+		React.useCallback(() => {
+			fetchAdminRestaurants();
+
+			return () => {
+				setRestaurants([]);
+			};
+		}, [])
+	);
+
+	const fetchAdminRestaurants = async () => {
+		const storedToken = await AsyncStorage.getItem('token');
+		if (!storedToken) {
+			navigation.navigate('Login');
+		} else {
+			setToken(storedToken);
+			fetch(`${env.API_URL}/restaurants/admin`, {
+				method: 'GET',
+				headers: {
+					Authorization: 'Bearer ' + storedToken,
+				},
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					setRestaurants(data);
 				})
-					.then((response) => response.json())
-					.then((data) => {
-						setRestaurants(data);
-					})
-					.catch((error) => {
-						console.error(error);
-					});
-			}
-		};
-		fetchAdminRestaurants();
-	}, []);
+				.catch((error) => {
+					console.error(error);
+				});
+		}
+	};
 
 	const handleCreateRestaurant = () => {
 		// Navigate to the create restaurant screen
 		navigation.navigate('CreateRestaurant');
+		navigation.addListener('focus', fetchAdminRestaurants);
 	};
 
 	const handleUpdateRestaurant = (restaurantId) => {

@@ -1,14 +1,15 @@
-import { View, Text, TextInput } from 'react-native';
+import { View, TextInput, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { env } from '../../../env';
 
-export default function Search({ searchRef, setRestaurants }) {
+export default function Search({ searchRef, setRestaurants, fetchAllRestaurants }) {
 	const [searchQuery, setSearchQuery] = useState('');
 	const handleSearch = async () => {
-		if (!searchQuery) {
+		if (!searchQuery || searchQuery.length < 3) {
 			return;
 		}
+
 		try {
 			const response = await fetch(`${env.API_URL}/restaurants/search/${searchQuery}`);
 			const data = await response.json();
@@ -19,7 +20,7 @@ export default function Search({ searchRef, setRestaurants }) {
 	};
 
 	return (
-		<View className='flex-row flex-1 items-center p-3 rounded-full border border-gray-300'>
+		<View className='flex-row flex-1 items-center p-3 mt-3 rounded-full border border-gray-300'>
 			<Ionicons name='search' size={24} color='black' />
 			<TextInput
 				placeholder='Restaurants or food'
@@ -29,8 +30,9 @@ export default function Search({ searchRef, setRestaurants }) {
 				onSubmitEditing={handleSearch}
 			/>
 			<View className='flex-row items-center space-x-1 border-0 border-l-2 pl-2 border-l-gray-300'>
-				<Feather name='map-pin' size={24} color='black' />
-				<Text className='text-gray-600'></Text>
+				<TouchableOpacity onPress={fetchAllRestaurants}>
+					<MaterialIcons name='clear' size={30} color='black' />
+				</TouchableOpacity>
 			</View>
 		</View>
 	);

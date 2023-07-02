@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { env } from '../../../env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Feather } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
+import { Feather } from '@expo/vector-icons';
 
-const UpdateRestaurantScreen = () => {
+const UpdateRestaurantScreen = ({ route }) => {
 	const navigation = useNavigation();
-	const route = useRoute();
-	const { restaurantId, updateRestaurantData } = route.params;
+	const { restaurantId } = route.params;
 	const [restaurant, setRestaurant] = useState(null);
 	const [token, setToken] = useState('');
-	const [restaurantName, setRestaurantName] = useState('');
-	const [location, setLocation] = useState('');
-	const [logo, setLogo] = useState(null);
-	const [menu, setMenu] = useState([]);
+	const [updatedRestaurant, setUpdatedRestaurant] = useState({
+		restaurantName: '',
+		location: '',
+		logo: '',
+		menu: [],
+	});
 
 	useEffect(() => {
-		fetchRestaurantData();
+		fetchRestaurant();
 	}, []);
 
-	const fetchRestaurantData = async () => {
+	const fetchRestaurant = async () => {
 		const storedToken = await AsyncStorage.getItem('token');
 		if (!storedToken) {
 			navigation.navigate('Login');
@@ -37,14 +37,12 @@ const UpdateRestaurantScreen = () => {
 				.then((response) => response.json())
 				.then((data) => {
 					setRestaurant(data);
-					setRestaurantName(data.restaurantName);
-					setLocation(data.location);
-					setLogo(data.logo);
-					if (Array.isArray(data.menu)) {
-						setMenu(data.menu);
-					} else {
-						setMenu([]);
-					}
+					setUpdatedRestaurant({
+						restaurantName: data.restaurantName,
+						location: data.location,
+						logo: data.logo,
+						menu: data.menu || [],
+					});
 				})
 				.catch((error) => {
 					console.error(error);
@@ -53,13 +51,6 @@ const UpdateRestaurantScreen = () => {
 	};
 
 	const handleUpdateRestaurant = () => {
-		const updatedRestaurant = {
-			restaurantName,
-			location,
-			logo,
-			menu,
-		};
-
 		fetch(`${env.API_URL}/restaurants/${restaurantId}`, {
 			method: 'PATCH',
 			headers: {
@@ -70,192 +61,200 @@ const UpdateRestaurantScreen = () => {
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				updateRestaurantData(data);
-				navigation.navigate('Admin');
+				// Handle success and show appropriate message
+				Alert.alert('Success', data.message, [{ text: 'OK' }]);
 			})
 			.catch((error) => {
 				console.error(error);
+				// Handle error and show appropriate message
+				Alert.alert('Error', 'Failed to update restaurant', [{ text: 'OK' }]);
 			});
 	};
 
-	const updateRestaurant = (updatedRestaurant) => {
-		// Update the state in the AdminScreen component
-		updateRestaurantData(updatedRestaurant);
+	const handleChangeRestaurantName = (text) => {
+		setUpdatedRestaurant((prevState) => ({
+			...prevState,
+			restaurantName: text,
+		}));
+	};
+
+	const handleChangeLocation = (text) => {
+		setUpdatedRestaurant((prevState) => ({
+			...prevState,
+			location: text,
+		}));
+	};
+
+	const handleChangeLogo = (text) => {
+		setUpdatedRestaurant((prevState) => ({
+			...prevState,
+			logo: text,
+		}));
+	};
+
+	const handleChangeProductName = (index, text) => {
+		setUpdatedRestaurant((prevState) => {
+			const updatedMenu = [...prevState.menu];
+			updatedMenu[index].productName = text;
+			return {
+				...prevState,
+				menu: updatedMenu,
+			};
+		});
+	};
+
+	const handleChangeDescription = (index, text) => {
+		setUpdatedRestaurant((prevState) => {
+			const updatedMenu = [...prevState.menu];
+			updatedMenu[index].description = text;
+			return {
+				...prevState,
+				menu: updatedMenu,
+			};
+		});
+	};
+
+	const handleChangePrice = (index, text) => {
+		setUpdatedRestaurant((prevState) => {
+			const updatedMenu = [...prevState.menu];
+			updatedMenu[index].price = text;
+			return {
+				...prevState,
+				menu: updatedMenu,
+			};
+		});
+	};
+
+	const handleChangeImage = (index, text) => {
+		setUpdatedRestaurant((prevState) => {
+			const updatedMenu = [...prevState.menu];
+			updatedMenu[index].image = text;
+			return {
+				...prevState,
+				menu: updatedMenu,
+			};
+		});
 	};
 
 	const handleAddProduct = () => {
-		const newProduct = {
-			productName: '',
-			description: '',
-			price: '',
-			image: null,
-		};
-
-		setMenu([...menu, newProduct]);
+		setUpdatedRestaurant((prevState) => ({
+			...prevState,
+			menu: [
+				...prevState.menu,
+				{
+					productName: '',
+					description: '',
+					price: '',
+					image: '',
+				},
+			],
+		}));
 	};
 
-	const handleDeleteProduct = (index) => {
-		const updatedMenu = [...menu];
-		updatedMenu.splice(index, 1);
-		setMenu(updatedMenu);
-	};
-
-	const handleProductChange = (index, key, value) => {
-		const updatedMenu = [...menu];
-		updatedMenu[index][key] = value;
-		setMenu(updatedMenu);
-	};
-
-	const handleChooseLogo = async () => {
-		const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-		if (permissionResult.granted === false) {
-			Alert.alert('Permission required', 'Please allow access to the device gallery.');
-			return;
-		}
-
-		const result = await ImagePicker.launchImageLibraryAsync({
-			mediaTypes: ImagePicker.MediaTypeOptions.Images,
-			allowsEditing: true,
-			aspect: [4, 3],
-			quality: 1,
+	const handleRemoveProduct = (index) => {
+		setUpdatedRestaurant((prevState) => {
+			const updatedMenu = [...prevState.menu];
+			updatedMenu.splice(index, 1);
+			return {
+				...prevState,
+				menu: updatedMenu,
+			};
 		});
-
-		if (!result.canceled) {
-			setLogo(result.assets[0].uri);
-		}
-	};
-
-	const handleChooseProductImage = async (index) => {
-		const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-		if (permissionResult.granted === false) {
-			Alert.alert('Permission required', 'Please allow access to the device gallery.');
-			return;
-		}
-
-		const result = await ImagePicker.launchImageLibraryAsync({
-			mediaTypes: ImagePicker.MediaTypeOptions.Images,
-			allowsEditing: true,
-			aspect: [4, 3],
-			quality: 1,
-		});
-
-		if (!result.canceled) {
-			const updatedMenu = [...menu];
-			updatedMenu[index].image = result.assets[0].uri;
-			setMenu(updatedMenu);
-		}
 	};
 
 	return (
-		<SafeAreaView style={{ flex: 1 }}>
-			<ScrollView style={{ padding: 4 }}>
-				{restaurant ? (
+		<SafeAreaView className='flex-1'>
+			<ScrollView className='p-4'>
+				<TouchableOpacity onPress={() => navigation.goBack()} className='absolute top-2 left-2'>
+					<Feather name='arrow-left' size={24} color='black' />
+				</TouchableOpacity>
+				<Text className='text-2xl font-bold mb-4 text-center'>Update Restaurant</Text>
+				{restaurant && (
 					<View>
-						<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Restaurant Name</Text>
+						<Text className='text-lg font-bold mb-2'>Restaurant Name</Text>
+						<Text className='mb-4'>{restaurant.restaurantName}</Text>
 						<TextInput
-							value={restaurantName}
-							onChangeText={setRestaurantName}
-							placeholder='Enter the restaurant name'
-							style={{ borderWidth: 1, borderColor: 'gray', padding: 2, borderRadius: 5, marginBottom: 4 }}
+							value={updatedRestaurant.restaurantName}
+							onChangeText={handleChangeRestaurantName}
+							placeholder='Enter restaurant name'
+							className='border p-2 mb-4'
 						/>
 
-						<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Location</Text>
+						<Text className='text-lg font-bold mb-2'>Location</Text>
+						<Text className='mb-4'>{restaurant.location}</Text>
 						<TextInput
-							value={location}
-							onChangeText={setLocation}
-							placeholder='Enter the location'
-							style={{ borderWidth: 1, borderColor: 'gray', padding: 2, borderRadius: 5, marginBottom: 4 }}
+							value={updatedRestaurant.location}
+							onChangeText={handleChangeLocation}
+							placeholder='Enter location'
+							className='border p-2 mb-4'
 						/>
 
-						<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Logo</Text>
-						<TouchableOpacity onPress={handleChooseLogo}>
-							{logo ? (
-								<Image source={{ uri: logo }} style={{ width: 100, height: 100, marginBottom: 4 }} />
-							) : (
-								<View
-									style={{
-										width: 100,
-										height: 100,
-										borderWidth: 1,
-										borderColor: 'black',
-										justifyContent: 'center',
-										alignItems: 'center',
-										marginBottom: 4,
-									}}
-								>
-									<Feather name='camera' size={24} color='black' />
-									<Text>Add Logo</Text>
-								</View>
-							)}
-						</TouchableOpacity>
+						<Text className='text-lg font-bold mb-2'>Logo URL</Text>
+						<Text className='mb-4'>{restaurant.logo}</Text>
+						<TextInput
+							value={updatedRestaurant.logo}
+							onChangeText={handleChangeLogo}
+							placeholder='Enter logo URL'
+							className='border p-2 mb-4'
+						/>
 
-						<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Menu</Text>
-						{menu.map((product, index) => (
-							<View key={index} style={{ marginBottom: 4 }}>
-								<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Product Name</Text>
+						<Text className='text-lg font-bold mb-2'>Menu</Text>
+						{updatedRestaurant.menu.map((product, index) => (
+							<View key={index}>
+								<Text className='text-lg font-bold mb-2'>Product {index + 1}</Text>
+								<Text className='mb-2'>Product Name: {product.productName}</Text>
 								<TextInput
 									value={product.productName}
-									onChangeText={(value) => handleProductChange(index, 'productName', value)}
-									placeholder='Enter the product name'
-									style={{ borderWidth: 1, borderColor: 'gray', padding: 2, borderRadius: 5, marginBottom: 2 }}
+									onChangeText={(text) => handleChangeProductName(index, text)}
+									placeholder='Enter product name'
+									className='border p-2 mb-2'
 								/>
 
-								<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Description</Text>
+								<Text className='mb-2'>Description: {product.description}</Text>
 								<TextInput
 									value={product.description}
-									onChangeText={(value) => handleProductChange(index, 'description', value)}
-									placeholder='Enter the description'
-									style={{ borderWidth: 1, borderColor: 'gray', padding: 2, borderRadius: 5, marginBottom: 2 }}
+									onChangeText={(text) => handleChangeDescription(index, text)}
+									placeholder='Enter description'
+									className='border p-2 mb-2'
 								/>
 
-								<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Price</Text>
+								<Text className='mb-2'>Price: {product.price}</Text>
 								<TextInput
-									value={product.price.toString()}
-									onChangeText={(value) => handleProductChange(index, 'price', parseFloat(value))}
-									placeholder='Enter the price'
-									keyboardType='numeric'
-									style={{ borderWidth: 1, borderColor: 'gray', padding: 2, borderRadius: 5, marginBottom: 2 }}
+									value={product.price}
+									onChangeText={(text) => handleChangePrice(index, text)}
+									placeholder='Enter price'
+									className='border p-2 mb-2'
 								/>
 
-								<Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 2 }}>Image</Text>
-								<TouchableOpacity onPress={() => handleChooseProductImage(index)}>
-									{product.image ? (
-										<Image source={{ uri: product.image }} style={{ width: 100, height: 100, marginBottom: 2 }} />
-									) : (
-										<View
-											style={{
-												width: 100,
-												height: 100,
-												borderWidth: 1,
-												borderColor: 'black',
-												justifyContent: 'center',
-												alignItems: 'center',
-												marginBottom: 2,
-											}}
-										>
-											<Feather name='camera' size={24} color='black' />
-											<Text>Add Image</Text>
-										</View>
-									)}
-								</TouchableOpacity>
+								<Text className='mb-4'>Image URL: {product.image}</Text>
+								<TextInput
+									value={product.image}
+									onChangeText={(text) => handleChangeImage(index, text)}
+									placeholder='Enter image URL'
+									className='border p-2 mb-4'
+								/>
 
-								<TouchableOpacity onPress={() => handleDeleteProduct(index)}>
-									<Text style={{ color: 'red', marginTop: 2 }}>Delete</Text>
+								<TouchableOpacity onPress={() => handleRemoveProduct(index)} className='p-2 bg-red-500 rounded'>
+									<Text className='text-white font-bold'>Remove Product</Text>
 								</TouchableOpacity>
 							</View>
 						))}
 
-						<TouchableOpacity onPress={handleAddProduct}>
-							<Text style={{ color: 'blue', marginBottom: 4 }}>Add Product</Text>
+						<TouchableOpacity onPress={handleAddProduct} className='p-2 bg-green-500 rounded'>
+							<Text className='text-white font-bold'>Add Product</Text>
 						</TouchableOpacity>
 
-						<TouchableOpacity onPress={handleUpdateRestaurant} style={{ marginBottom: 2 }}>
-							<Text style={{ color: 'white', backgroundColor: 'blue', padding: 2, borderRadius: 5, textAlign: 'center' }}>
-								Apply Changes
-							</Text>
+						<TouchableOpacity
+							onPress={() => {
+								handleUpdateRestaurant();
+								navigation.navigate('Admin');
+							}}
+							className='p-4 bg-blue-500 rounded'
+						>
+							<Text className='text-white font-bold'>Update Restaurant</Text>
 						</TouchableOpacity>
 					</View>
-				) : null}
+				)}
 			</ScrollView>
 		</SafeAreaView>
 	);
