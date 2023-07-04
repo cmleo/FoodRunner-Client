@@ -7,7 +7,7 @@ export default function OrderReceivedScreen() {
 	const navigation = useNavigation();
 	useEffect(() => {
 		setTimeout(() => {
-			navigation.navigate('Home');
+			navigation.navigate('Home', { role: 'user' });
 		}, 5000);
 	}, []);
 

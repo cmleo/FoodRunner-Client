@@ -47,13 +47,11 @@ const AdminScreen = () => {
 	};
 
 	const handleCreateRestaurant = () => {
-		// Navigate to the create restaurant screen
 		navigation.navigate('CreateRestaurant');
 		navigation.addListener('focus', fetchAdminRestaurants);
 	};
 
 	const handleUpdateRestaurant = (restaurantId) => {
-		// Navigate to the update restaurant screen with the restaurant ID
 		navigation.navigate('UpdateRestaurant', { restaurantId });
 	};
 
@@ -82,7 +80,6 @@ const AdminScreen = () => {
 							},
 						})
 							.then(() => {
-								// Refresh the list of restaurants after deleting one
 								fetchAdminRestaurants();
 							})
 							.catch((error) => {

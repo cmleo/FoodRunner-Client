@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useEffect } from 'react';
-import { Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import Footer from '../Footer/Footer';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { env } from '../../../env';
@@ -41,11 +41,10 @@ function Dashboard({ navigation }) {
 				setUserData(data[0]);
 			} catch (error) {
 				console.error('Fetch user data error:', error);
-				// Handle the error - display an error message or take appropriate action
 			}
 		};
+
 		fetchUserData();
-		console.log(userRole);
 	}, []);
 
 	const handleLogout = async () => {
@@ -63,6 +62,7 @@ function Dashboard({ navigation }) {
 			const updateData = {};
 			if (name) {
 				updateData.name = name;
+				setEditing(false);
 			}
 			if (email && validateEmail(email)) {
 				updateData.email = email;
@@ -84,6 +84,9 @@ function Dashboard({ navigation }) {
 			});
 			const data = await response.json();
 			setUserData(data.result);
+			setName('');
+			setEmail('');
+			setPhone('');
 		} catch (error) {
 			console.error('Update info error:', error);
 		}
@@ -108,18 +111,26 @@ function Dashboard({ navigation }) {
 			});
 
 			if (response.status === 401) {
-				setCurrentPasswordError('Invalid current password');
+				const responseData = await response.json();
+				const errorMessage = responseData.message;
+				setCurrentPasswordError(errorMessage);
 				return;
 			}
 
-			const data = await response.json();
-			if (data.token) {
-				// Update the stored token with the new one
-				await AsyncStorage.setItem('token', data.token);
-				setPasswordChanged(true);
-				setCurrentPassword('');
-				setNewPassword('');
-			}
+			setPasswordChanged(true);
+			setCurrentPassword('');
+			setNewPassword('');
+
+			setTimeout(() => {
+				Alert.alert('Password changed successfully!', 'Please login again.', [
+					{
+						text: 'OK',
+						onPress: () => {
+							navigation.navigate('Login');
+						},
+					},
+				]);
+			}, 700);
 		} catch (error) {
 			console.error('Change password error:', error);
 		}

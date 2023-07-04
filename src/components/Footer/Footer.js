@@ -17,7 +17,6 @@ const Footer = ({ searchRef, role }) => {
 					} else if (role === 'admin') {
 						navigation.navigate('Admin', { role });
 					}
-					console.log(role);
 				}}
 			>
 				<AntDesign name='home' size={24} color='black' />
@@ -30,7 +29,6 @@ const Footer = ({ searchRef, role }) => {
 			<TouchableOpacity
 				onPress={() => {
 					navigation.navigate('Dashboard', { role });
-					console.log(role);
 				}}
 			>
 				<FontAwesome name='user' size={24} color='black' />
